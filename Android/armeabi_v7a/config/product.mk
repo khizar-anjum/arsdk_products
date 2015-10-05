@@ -3,4 +3,4 @@
 include $(TARGET_CONFIG_DIR)/../../../common/config/Android/product.mk
 
 TARGET_ARCH = arm
-ARSDK_BUILD_ANDROID_ARCH = armeabi-v7a
+TARGET_CPU = armv7a-neon
