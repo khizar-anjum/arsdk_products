@@ -10,7 +10,7 @@ def build_jni():
     arfreeflight_android_jni_dir = os.path.join(dragon.WORKSPACE_DIR, "packages", "ARFreeFlight", "Android", "ARFreeFlight", "jni")
 
     # Call ndk-build
-    dragon.exec_dir_cmd(dirpath=arfreeflight_android_jni_dir, cmd="ndk-build")
+    dragon.exec_dir_cmd(dirpath=arfreeflight_android_jni_dir, cmd="${ANDROID_NDK_PATH}/ndk-build")
 
 def build_app(release=False):
     arbuildutils_dir = os.path.join(dragon.WORKSPACE_DIR, "packages", "ARBuildUtils")
