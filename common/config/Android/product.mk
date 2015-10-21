@@ -10,6 +10,9 @@ COMMON_CONFIG_ANDROID_DIR := $(call my-dir)
 
 include $(COMMON_CONFIG_ANDROID_DIR)/../common.mk
 
+$(call check_defined, ANDROID_NDK_PATH, path to Android NDK)
+$(call check_defined, ANDROID_SDK_PATH, path to Android SDK)
+
 TARGET_OS = linux
 TARGET_OS_FLAVOUR = android
 TARGET_LIBC = bionic
