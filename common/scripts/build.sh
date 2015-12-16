@@ -117,27 +117,42 @@ function _launch_alchemake()
 ################################################################################
 function _build_android_jni()
 {
-	local app=BebopDronePiloting
-	echo >&2 "> ndk-build"
-	(cd ${TOP_DIR}/packages/Samples/Android/${app}/app/jni && ${ANDROID_NDK_PATH}/ndk-build)
+    echo >&2 "> ndk-build"
+    DIRS=$(find ${TOP_DIR}/packages/Samples/ -name 'Android.mk' -print0 | xargs -0 -n1 dirname)
+    for DIR in ${DIRS}
+    do
+        cd ${DIR}
+        ${ANDROID_NDK_PATH}/ndk-build
+    done
+    cd ${TOP_DIR}
 }
 
 ################################################################################
 ################################################################################
-function _build_android_app()
+function _build_android_samples()
 {
-	local app=BebopDronePiloting
-	echo >&2 "> gradle"
-	(cd ${TOP_DIR}/packages/Samples/Android/${app} && ./gradlew assembleDebug)
+    echo >&2 "> gradle"
+    DIRS=$(find ${TOP_DIR}/packages/Samples -name 'gradlew' -print0 | xargs -0 -n1 dirname)
+    for DIR in ${DIRS}
+    do
+        cd ${DIR}
+        ./gradlew assembleDebug
+    done
+    cd ${TOP_DIR}
 }
 
 ################################################################################
 ################################################################################
-function _build_ios_app()
+function _build_ios_samples()
 {
-	local app=BebopDronePiloting
-	echo >&2 "> xcodebuild"
-	(cd ${TOP_DIR}/packages/Samples/iOS/${app}/${app} && xcodebuild -arch x86_64  -sdk iphonesimulator9.1)
+    echo >&2 "> xcodebuild"
+    DIRS=$(find ${TOP_DIR}/packages/Samples -name '*.xcodeproj' -print0 | xargs -0 -n1 dirname)
+    for DIR in ${DIRS}
+    do
+        cd ${DIR}
+        xcodebuild -arch x86_64  -sdk iphonesimulator9.0
+    done
+    cd ${TOP_DIR}
 }
 
 ################################################################################
@@ -175,9 +190,9 @@ elif [ "${VARIANT}" = "forall" ]; then
 	if [ "${PRODUCT}" = "Android" ]; then
 		if [ "${opt_task}" = "build-jni" ]; then
 			_build_android_jni
-		elif [ "${opt_task}" = "build-app" ]; then
+		elif [ "${opt_task}" = "build-samples" ]; then
 			_build_android_jni
-			_build_android_app
+			_build_android_samples
 		fi
 	fi
 else
@@ -185,10 +200,11 @@ else
 
 	if [ "${PRODUCT}" = "iOS" ]; then
 		if [ "${VARIANT}" = "iphonesimulator" ]; then
-			if [ "${opt_task}" = "build-app" ]; then
-				_build_ios_app
+			if [ "${opt_task}" = "build-samples" ]; then
+				_build_ios_samples
 			fi
 		fi
 	fi
 fi
+
 
