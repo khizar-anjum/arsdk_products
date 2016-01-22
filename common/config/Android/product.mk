@@ -10,6 +10,11 @@ COMMON_CONFIG_ANDROID_DIR := $(call my-dir)
 
 include $(COMMON_CONFIG_ANDROID_DIR)/../common.mk
 
+# use global config for all variantes
+CONFIG_GLOBAL_FILE := $(COMMON_CONFIG_ANDROID_DIR)/global.config
+custom.libARNetwork.config :=$(COMMON_CONFIG_ANDROID_DIR)/libARNetwork.config
+custom.liblynx.config :=$(COMMON_CONFIG_ANDROID_DIR)/liblynx.config
+
 $(call check_defined, ANDROID_NDK_PATH, path to Android NDK)
 $(call check_defined, ANDROID_SDK_PATH, path to Android SDK)
 
