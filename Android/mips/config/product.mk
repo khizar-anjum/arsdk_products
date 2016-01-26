@@ -2,5 +2,5 @@
 
 include $(TARGET_CONFIG_DIR)/../../../common/config/Android/product.mk
 
-TARGET_ARCH = mips
-TARGET_CPU = mips
+TARGET_ARCH := mips
+TARGET_CPU :=
