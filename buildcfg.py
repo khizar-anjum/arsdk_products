@@ -48,8 +48,9 @@ def add_android_sample(sample):
 if dragon.VARIANT == "android":
     all_samples = []
     for sample in os.listdir(android_samples_dir):
-        add_android_sample(sample)
-        all_samples.append("build-sample-%s" % sample)
+        if sample != "FreeFlight3Extract":
+            add_android_sample(sample)
+            all_samples.append("build-sample-%s" % sample)
 
     dragon.add_meta_task(
         name = "build-samples",
