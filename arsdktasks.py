@@ -2,6 +2,9 @@
 import os
 import dragon
 
+#===============================================================================
+#===============================================================================
+
 # For compatibility with previous output directory hierarchy
 def create_android_compat_symlink(abi):
     dragon.relative_symlink(os.path.join(dragon.OUT_DIR, abi),
@@ -19,6 +22,8 @@ def create_native_compat_symlink():
     dragon.relative_symlink(os.path.join(dragon.OUT_DIR),
             os.path.join(dragon.OUT_DIR, "..", "Unix-base"))
 
+#===============================================================================
+#===============================================================================
 def setup_android_abi(task, abi):
     task.extra_env["ANDROID_ABI"]=abi
 
@@ -36,6 +41,8 @@ def add_android_abi(abi):
         outsubdir = abi
     )
 
+#===============================================================================
+#===============================================================================
 if dragon.VARIANT == "android":
     # Register all abi/arch
     add_android_abi("armeabi")
@@ -56,6 +63,8 @@ if dragon.VARIANT == "android":
         weak=True
 )
 
+#===============================================================================
+#===============================================================================
 if dragon.VARIANT == "ios":
     dragon.add_alchemy_task(
         name = "build-sdk",
@@ -67,6 +76,8 @@ if dragon.VARIANT == "ios":
         weak = True,
     )
 
+#===============================================================================
+#===============================================================================
 if dragon.VARIANT == "ios_sim":
     dragon.add_alchemy_task(
         name = "build-sdk",
@@ -88,32 +99,3 @@ if dragon.VARIANT == "native":
         posthook = lambda task, args: create_native_compat_symlink(),
         weak = True,
     )
-
-def build_android_jni(dirpath, args):
-    dragon.exec_dir_cmd(dirpath=dirpath, cmd="${ANDROID_NDK_PATH}/ndk-build")
-
-def build_android_app(dirpath, args, release=False):
-    arbuildutils_dir = os.path.join(dragon.WORKSPACE_DIR, "packages", "ARBuildUtils")
-
-    # Build application
-    dragon.exec_dir_cmd(dirpath=arbuildutils_dir, cmd="./generateAndroidResources.sh")
-    dragon.exec_dir_cmd(dirpath=arbuildutils_dir, cmd="./generateLocalPropertiesFile.py")
-    dragon.exec_dir_cmd(dirpath=os.path.join(dirpath, "script"), cmd="./generateCompatiblesDevices.py")
-    if release:
-        dragon.exec_dir_cmd(dirpath=dirpath, cmd="./gradlew assembleRelease")
-    else:
-        dragon.exec_dir_cmd(dirpath=dirpath, cmd="./gradlew assembleDebug")
-
-def build_ios_app(dirpath, project, args, release=False):
-    # Build application
-    cmd = "xcodebuild "
-    cmd += "-project %s " % project
-    if release:
-        cmd += "-configuration Release "
-    else:
-        cmd += "-configuration Debug "
-
-    if args:
-        cmd += " ".join(args)
-    dragon.exec_dir_cmd(dirpath=dirpath, cmd=cmd)
-
