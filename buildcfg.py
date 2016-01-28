@@ -94,3 +94,14 @@ if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
         desc = "Build all android samples",
         subtasks = all_samples
     )
+
+#===============================================================================
+# Unix
+#===============================================================================
+if dragon.VARIANT == "native":
+    # Samples are actually built at the same time as the sdk
+    dragon.add_meta_task(
+        name = "build-samples",
+        desc = "Build all native samples",
+        subtasks = ["build-sdk"]
+    )
