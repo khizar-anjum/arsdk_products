@@ -109,9 +109,9 @@ def build_ios_app(dirpath, project, args, release=False):
     cmd = "xcodebuild "
     cmd += "-project %s " % project
     if release:
-        cmd += "-configuration Debug "
-    else:
         cmd += "-configuration Release "
+    else:
+        cmd += "-configuration Debug "
 
     if args:
         cmd += " ".join(args)
