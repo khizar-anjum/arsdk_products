@@ -65,6 +65,8 @@ def build_ios_app(dirpath, project, sdk, args, release=False):
     cmd = "xcodebuild "
     cmd += "-project %s " % project
     cmd += "-sdk %s " % sdk
+    if sdk == "iphonesimulator":
+        cmd += "-arch x86_64 "
     cmd += "-configuration Release " if release else "-configuration Debug "
     if args:
         cmd += " ".join(args)
