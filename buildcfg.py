@@ -47,15 +47,16 @@ def add_android_sample(sample):
 
 if dragon.VARIANT == "android":
     all_samples = []
-    for sample in os.listdir(android_samples_dir):
-        if sample != "FreeFlight3Extract":
-            add_android_sample(sample)
-            all_samples.append("build-sample-%s" % sample)
+    if os.path.exists(android_samples_dir):
+        for sample in os.listdir(android_samples_dir):
+            if sample != "FreeFlight3Extract":
+                add_android_sample(sample)
+                all_samples.append("build-sample-%s" % sample)
 
-    dragon.add_meta_task(
-        name = "build-samples",
-        desc = "Build all android samples",
-        subtasks = all_samples
+        dragon.add_meta_task(
+            name = "build-samples",
+            desc = "Build all android samples",
+            subtasks = all_samples
     )
 
 #===============================================================================
@@ -87,15 +88,16 @@ def add_ios_sample(sample):
 
 if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
     all_samples = []
-    for sample in os.listdir(ios_samples_dir):
-        if sample != "FreeFlight3Extract":
-            add_ios_sample(sample)
-            all_samples.append("build-sample-%s" % sample)
+    if os.path.exists(android_samples_dir):
+        for sample in os.listdir(ios_samples_dir):
+            if sample != "FreeFlight3Extract":
+                add_ios_sample(sample)
+                all_samples.append("build-sample-%s" % sample)
 
-    dragon.add_meta_task(
-        name = "build-samples",
-        desc = "Build all android samples",
-        subtasks = all_samples
+        dragon.add_meta_task(
+            name = "build-samples",
+            desc = "Build all android samples",
+            subtasks = all_samples
     )
 
 #===============================================================================
