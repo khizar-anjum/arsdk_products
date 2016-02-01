@@ -1,8 +1,8 @@
 
-IOS_SIM_CONFIG_DIR := $(call my-dir)
+IOS_SIM_COMMON_CONFIG_DIR := $(call my-dir)
 
 # Include common product.mk
-include $(IOS_SIM_CONFIG_DIR)/../../common/config/product.mk
+include $(IOS_SIM_COMMON_CONFIG_DIR)/../../common/config/product.mk
 
 # Override alchemy default AR
 TARGET_AR := $(shell xcrun --find --sdk iphonesimulator ar)
