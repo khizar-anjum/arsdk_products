@@ -71,7 +71,7 @@ if dragon.VARIANT == "ios":
         desc = "Build ios sdk",
         product = dragon.PRODUCT,
         variant = dragon.VARIANT,
-        defargs = ["all"],
+        defargs = ["all","sdk"],
         posthook = lambda task, args: create_ios_compat_symlink(),
         weak = True,
     )
@@ -84,7 +84,7 @@ if dragon.VARIANT == "ios_sim":
         desc = "Build ios simulattor sdk",
         product = dragon.PRODUCT,
         variant = dragon.VARIANT,
-        defargs = ["all"],
+        defargs = ["all","sdk"],
         posthook = lambda task, args: create_ios_sim_compat_symlink(),
         weak = True,
     )
