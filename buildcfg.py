@@ -3,7 +3,14 @@ import sys, os
 import dragon
 
 # Disable all default tasks and import arsdk ones
-dragon.disable_def_tasks()
+keep_list = [
+    "alchemy",
+    "geneclipse",
+    "publish",
+    "reference-checker",
+    "reference-creator",
+]
+dragon.disable_def_tasks(keep_list=keep_list)
 from arsdktasks import *
 
 android_samples_dir = os.path.join(dragon.WORKSPACE_DIR,
