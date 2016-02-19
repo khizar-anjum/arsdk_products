@@ -56,9 +56,8 @@ if dragon.VARIANT == "android":
     all_samples = []
     if os.path.exists(android_samples_dir):
         for sample in os.listdir(android_samples_dir):
-            if sample != "FreeFlight3Extract":
-                add_android_sample(sample)
-                all_samples.append("build-sample-%s" % sample)
+            add_android_sample(sample)
+            all_samples.append("build-sample-%s" % sample)
 
         dragon.add_meta_task(
             name = "build-samples",
@@ -97,9 +96,8 @@ if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
     all_samples = []
     if os.path.exists(android_samples_dir):
         for sample in os.listdir(ios_samples_dir):
-            if sample != "FreeFlight3Extract":
-                add_ios_sample(sample)
-                all_samples.append("build-sample-%s" % sample)
+            add_ios_sample(sample)
+            all_samples.append("build-sample-%s" % sample)
 
         dragon.add_meta_task(
             name = "build-samples",
