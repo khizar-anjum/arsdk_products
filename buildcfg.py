@@ -133,3 +133,23 @@ if dragon.VARIANT == "native":
         desc = "Build all native samples",
         subtasks = all_samples
     )
+
+#===============================================================================
+# generate sources task
+#===============================================================================
+def hook_gen_sources(task, args):
+    packages_dir = os.path.join(dragon.WORKSPACE_DIR, "packages")
+    for package in os.listdir(packages_dir):
+        try:
+            path = os.path.join(packages_dir, package)
+            if os.path.isfile(os.path.join(path, "updateGenerated.sh")):
+                dragon.exec_dir_cmd(dirpath=path, cmd="./updateGenerated.sh")
+                dragon.exec_dir_cmd(dirpath=path, cmd="git status")
+        except dragon.TaskError as ex:
+            dragon.logging.error(str(ex))
+
+dragon.add_meta_task(
+    name = "gensources",
+    desc = "Generate all sdk sources",
+    posthook = hook_gen_sources,
+)
