@@ -110,10 +110,28 @@ if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
 #===============================================================================
 # Unix
 #===============================================================================
+
+def add_unix_sample(sample):
+    dragon.add_alchemy_task(
+        name = "build-sample-%s" % sample,
+        desc = "Build unix sdk sample for %s" % sample,
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = [sample],
+    )
+
 if dragon.VARIANT == "native":
-    # Samples are actually built at the same time as the sdk
+    all_samples = []
+    samples = ["BebopDroneDecodeStream", "BebopDroneReceiveStream",
+               "BebopPilotingNewAPI", "JumpingSumoPilotingNewAPI",
+               "JumpingSumoChangePosture", "JumpingSumoPiloting",
+               "JumpingSumoReceiveStream"]
+    for sample in samples:
+        add_unix_sample(sample)
+        all_samples.append("build-sample-%s" % sample)
+
     dragon.add_meta_task(
         name = "build-samples",
         desc = "Build all native samples",
-        subtasks = ["build-sdk"]
+        subtasks = all_samples
     )
