@@ -15,10 +15,10 @@ ifeq ("$(ANDROID_ABI)","armeabi")
   TARGET_CPU := armv5te
 else ifeq ("$(ANDROID_ABI)","armeabi-v7a")
   TARGET_ARCH := arm
-  TARGET_CPU := armv7a-neon
+  TARGET_CPU := armv7a
 else ifeq ("$(ANDROID_ABI)","armeabi_v7a")
   TARGET_ARCH := arm
-  TARGET_CPU := armv7a-neon
+  TARGET_CPU := armv7a
 else ifeq ("$(ANDROID_ABI)","mips")
   TARGET_ARCH := mips
   TARGET_CPU :=
