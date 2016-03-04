@@ -13,11 +13,14 @@ keep_list = [
 dragon.disable_def_tasks(keep_list=keep_list)
 from arsdktasks import *
 
-android_samples_dir = os.path.join(dragon.WORKSPACE_DIR,
-        "packages", "Samples", "Android")
+android_arsdk3_dir = os.path.join(dragon.WORKSPACE_DIR,
+        "packages", "arsdk3")
 
-ios_samples_dir = os.path.join(dragon.WORKSPACE_DIR,
-        "packages", "Samples", "iOS")
+android_sample_dir = os.path.join(dragon.WORKSPACE_DIR,
+        "packages", "Samples", "Android", "SDKSample")
+
+ios_sample_dir = os.path.join(dragon.WORKSPACE_DIR,
+        "packages", "Samples", "iOS", "SDKSample")
 
 #===============================================================================
 # Android
@@ -33,37 +36,38 @@ def build_android_app(dirpath, args, release=False):
         cmd += " ".join(args)
     dragon.exec_dir_cmd(dirpath=dirpath, cmd=cmd)
 
-def add_android_sample(sample):
-    dragon.add_meta_task(
-        name = "build-jni-%s" % sample,
-        desc = "Build android sdk & jni for %s" % sample,
-        subtasks = ["build-sdk"],
-        posthook = lambda task, args: build_android_jni(
-                os.path.join(android_samples_dir, sample, "app", "jni"),
-                args)
-        )
-
-    dragon.add_meta_task(
-        name = "build-sample-%s" % sample,
-        desc = "Build android sdk & jni & sample for %s" % sample,
-        subtasks = ["build-jni-%s" % sample],
-        posthook = lambda task, args: build_android_app(
-                os.path.join(android_samples_dir, sample),
-                args, release=False)
-        )
+def publish_android_sdk():
+    # Build application
+    cmd = "./gradlew "
+    cmd += "bintrayUpload"
+    dragon.exec_dir_cmd(dirpath=android_arsdk3_dir, cmd=cmd)
 
 if dragon.VARIANT == "android":
-    all_samples = []
-    if os.path.exists(android_samples_dir):
-        for sample in os.listdir(android_samples_dir):
-            add_android_sample(sample)
-            all_samples.append("build-sample-%s" % sample)
-
-        dragon.add_meta_task(
-            name = "build-samples",
-            desc = "Build all android samples",
-            subtasks = all_samples
+    dragon.add_meta_task(
+            name = "build-jni",
+            desc = "Build android sdk & jni",
+            subtasks = ["build-sdk"],
+            posthook = lambda task, args: build_android_jni(
+                os.path.join(android_arsdk3_dir, "arsdk", "jni"),
+                args)
     )
+
+    dragon.add_meta_task(
+            name = "publish",
+            desc = "Build android sdk & jni",
+            subtasks = ["build-jni"],
+            posthook = lambda task, args: publish_android_sdk()
+    )
+
+    if os.path.exists(android_sample_dir):
+        dragon.add_meta_task(
+            name = "build-sample",
+            desc = "Build the android sample in debug",
+            subtasks = ["build-jni"],
+            posthook = lambda task, args: build_android_app(
+                os.path.join(android_sample_dir, "buildWithLocalSDK"),
+                args, release=False)
+        )
 
 #===============================================================================
 # iOS
@@ -73,37 +77,25 @@ def build_ios_app(dirpath, project, sdk, args, release=False):
     cmd = "xcodebuild "
     cmd += "-project %s " % project
     cmd += "-sdk %s " % sdk
+    cmd += "-configuration DebugWithLocalSDK "
     if sdk == "iphonesimulator":
         cmd += "-arch x86_64 "
-    cmd += "-configuration Release " if release else "-configuration Debug "
     if args:
         cmd += " ".join(args)
     dragon.exec_dir_cmd(dirpath=dirpath, cmd=cmd)
 
-def add_ios_sample(sample):
-    dragon.add_meta_task(
-        name = "build-sample-%s" % sample,
-        desc = "Build ios sdk & sample for %s" % sample,
-        subtasks = ["build-sdk"],
-        posthook = lambda task, args: build_ios_app(
-               os.path.join(ios_samples_dir, sample, sample),
-               sample + ".xcodeproj",
-               "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
-               args, release=False)
-        )
-
 if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
-    all_samples = []
-    if os.path.exists(android_samples_dir):
-        for sample in os.listdir(ios_samples_dir):
-            add_ios_sample(sample)
-            all_samples.append("build-sample-%s" % sample)
-
+    if os.path.exists(android_sample_dir):
         dragon.add_meta_task(
-            name = "build-samples",
-            desc = "Build all android samples",
-            subtasks = all_samples
-    )
+            name = "build-sample",
+            desc = "Build the ios samples in debug",
+            subtasks = ["build-sdk"],
+            posthook = lambda task, args: build_ios_app(
+                ios_sample_dir,
+                "SDKSample.xcodeproj",
+                "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
+                args, release=False)
+            )
 
 #===============================================================================
 # Unix
