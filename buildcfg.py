@@ -14,7 +14,7 @@ dragon.disable_def_tasks(keep_list=keep_list)
 from arsdktasks import *
 
 android_arsdk3_dir = os.path.join(dragon.WORKSPACE_DIR,
-        "packages", "arsdk3")
+        "packages", "ARSDK3")
 
 android_sample_dir = os.path.join(dragon.WORKSPACE_DIR,
         "packages", "Samples", "Android", "SDKSample")
