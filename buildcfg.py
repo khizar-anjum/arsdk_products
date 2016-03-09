@@ -121,7 +121,7 @@ if dragon.VARIANT == "native":
         all_samples.append("build-sample-%s" % sample)
 
     dragon.add_meta_task(
-        name = "build-samples",
+        name = "build-sample",
         desc = "Build all native samples",
         subtasks = all_samples
     )
