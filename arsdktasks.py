@@ -34,7 +34,7 @@ def add_android_abi(abi):
         desc = "Build android sdk for %s" % abi,
         product = dragon.PRODUCT,
         variant = dragon.VARIANT,
-        defargs = ["all"],
+        defargs = ["all", "sdk"],
         prehook = lambda task, args: setup_android_abi(task, abi),
         posthook = lambda task, args: create_android_compat_symlink(abi),
         weak = True,
