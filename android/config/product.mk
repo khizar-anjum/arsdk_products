@@ -26,7 +26,10 @@ else ifeq ("$(ANDROID_ABI)","x86")
   TARGET_ARCH := x86
   TARGET_CPU :=
 else ifeq ("$(ANDROID_ABI)","")
-  $(error Missing ANDROID_ABI)
+  $(warning Missing ANDROID_ABI using armeabi-v7a)
+  ANDROID_ABI := armeabi_v7a
+  TARGET_ARCH := arm
+  TARGET_CPU := armv7a
 else
   $(error Invalid ANDROID_ABI: $(ANDROID_ABI))
 endif
