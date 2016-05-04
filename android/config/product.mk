@@ -1,8 +1,8 @@
 
-ANDROID_COMMON_CONFIG_DIR := $(call my-dir)
+ARSDK_ANDROID_CONFIG_DIR := $(call my-dir)
 
 # Include common product.mk
-include $(ANDROID_COMMON_CONFIG_DIR)/../../common/config/product.mk
+include $(ARSDK_ANDROID_CONFIG_DIR)/../../common/config/product.mk
 
 # Setup TARGET_OS
 TARGET_OS := linux
