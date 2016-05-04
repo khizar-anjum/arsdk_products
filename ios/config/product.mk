@@ -1,8 +1,8 @@
 
-IOS_COMMON_CONFIG_DIR := $(call my-dir)
+ARSDK_IOS_CONFIG_DIR := $(call my-dir)
 
 # Include common product.mk
-include $(IOS_COMMON_CONFIG_DIR)/../../common/config/product.mk
+include $(ARSDK_IOS_CONFIG_DIR)/../../common/config/product.mk
 
 # Override alchemy default AR
 TARGET_AR := $(shell xcrun --find --sdk iphoneos ar)
