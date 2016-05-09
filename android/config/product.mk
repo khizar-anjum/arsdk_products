@@ -12,7 +12,6 @@ TARGET_LIBC := bionic
 # Setup arch/cpu based on abi
 ifeq ("$(ANDROID_ABI)","armeabi")
   TARGET_ARCH := arm
-  TARGET_CPU := armv5te
 else ifeq ("$(ANDROID_ABI)","armeabi-v7a")
   TARGET_ARCH := arm
   TARGET_CPU := armv7a
