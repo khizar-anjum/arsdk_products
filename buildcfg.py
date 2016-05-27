@@ -26,7 +26,12 @@ ios_sample_dir = os.path.join(dragon.WORKSPACE_DIR,
 # Android
 #===============================================================================
 def build_android_jni(dirpath, args):
-    dragon.exec_dir_cmd(dirpath=dirpath, cmd="${ANDROID_NDK_PATH}/ndk-build")
+    outdir = os.path.join(dragon.OUT_DIR, "jni")
+    args = "NDK_OUT=%s" % os.path.join(outdir, "obj")
+    args += " PRODUCT_OUT_DIR=%s" % dragon.OUT_DIR
+    args += " PACKAGES_DIR=%s" % os.path.join(dragon.WORKSPACE_DIR, "packages")
+    dragon.exec_dir_cmd(dirpath=dirpath,
+        cmd="${ANDROID_NDK_PATH}/ndk-build %s" % args)
 
 def build_android_app(dirpath, args, release=False):
     # Build application
