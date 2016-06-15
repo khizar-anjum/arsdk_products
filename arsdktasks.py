@@ -29,10 +29,12 @@ def setup_android_abi(task, abi):
 
 # Register a task to build android sdk for a specific abi/arch
 def add_android_abi(abi):
-    dragon.add_meta_task(
+    dragon.add_alchemy_task(
         name = "build-sdk-%s" % abi,
         desc = "Build android sdk for %s" % abi,
-        subtasks = ["alchemy all sdk"],
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = ["all", "sdk"],
         prehook = lambda task, args: setup_android_abi(task, abi),
         posthook = lambda task, args: create_android_compat_symlink(abi),
         weak = True,
@@ -64,10 +66,12 @@ if dragon.VARIANT == "android":
 #===============================================================================
 #===============================================================================
 if dragon.VARIANT == "ios":
-    dragon.add_meta_task(
+    dragon.add_alchemy_task(
         name = "build-sdk",
         desc = "Build ios sdk",
-        subtasks = ["alchemy all sdk"],
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = ["all","sdk"],
         posthook = lambda task, args: create_ios_compat_symlink(),
         weak = True,
     )
@@ -75,19 +79,23 @@ if dragon.VARIANT == "ios":
 #===============================================================================
 #===============================================================================
 if dragon.VARIANT == "ios_sim":
-    dragon.add_meta_task(
+    dragon.add_alchemy_task(
         name = "build-sdk",
         desc = "Build ios simulattor sdk",
-        subtasks = ["alchemy all sdk"],
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = ["all","sdk"],
         posthook = lambda task, args: create_ios_sim_compat_symlink(),
         weak = True,
     )
 
 if dragon.VARIANT == "native":
-    dragon.add_meta_task(
+    dragon.add_alchemy_task(
         name = "build-sdk",
         desc = "Build native sdk",
-        subtasks = ["alchemy all"],
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = ["all"],
         posthook = lambda task, args: create_native_compat_symlink(),
         weak = True,
     )
