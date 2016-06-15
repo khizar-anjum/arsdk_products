@@ -107,12 +107,10 @@ if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
 #===============================================================================
 
 def add_unix_sample(sample):
-    dragon.add_alchemy_task(
+    dragon.add_meta_task(
         name = "build-sample-%s" % sample,
         desc = "Build unix sdk sample for %s" % sample,
-        product = dragon.PRODUCT,
-        variant = dragon.VARIANT,
-        defargs = [sample],
+        subtasks = ["alchemy " + sample],
     )
 
 if dragon.VARIANT == "native":
