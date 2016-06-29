@@ -30,11 +30,10 @@ def setup_android_abi(task, abi):
 # Register a task to build android sdk for a specific abi/arch
 def add_android_abi(abi):
     dragon.add_alchemy_task(
-        name = "build-sdk-%s" % abi,
-        desc = "Build android sdk for %s" % abi,
+        name = "alchemy-%s" % abi,
+        desc = "Run alchemy task for %s" % abi,
         product = dragon.PRODUCT,
         variant = dragon.VARIANT,
-        defargs = ["all", "sdk"],
         prehook = lambda task, args: setup_android_abi(task, abi),
         posthook = lambda task, args: create_android_compat_symlink(abi),
         weak = True,
@@ -55,13 +54,25 @@ if dragon.VARIANT == "android":
         name="build-sdk",
         desc="Build android sdk for all architectures",
         subtasks=[
-            "build-sdk-armeabi",
-            "build-sdk-armeabi_v7a",
-            "build-sdk-mips",
-            "build-sdk-x86",
+            "alchemy-armeabi all sdk",
+            "alchemy-armeabi_v7a all sdk",
+            "alchemy-mips all sdk",
+            "alchemy-x86 all sdk",
         ],
         weak=True
-)
+    )
+
+    # override clean to clean all abi/arch
+    dragon.override_meta_task(
+        name="clean",
+        subtasks=[
+            "alchemy clobber",
+            "alchemy-armeabi clobber",
+            "alchemy-armeabi_v7a clobber",
+            "alchemy-mips clobber",
+            "alchemy-x86 clobber"
+        ]
+    )
 
 #===============================================================================
 #===============================================================================
