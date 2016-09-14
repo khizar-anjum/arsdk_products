@@ -30,8 +30,9 @@ def build_android_jni(dirpath, args):
     args = "NDK_OUT=%s" % os.path.join(outdir, "obj")
     args += " PRODUCT_OUT_DIR=%s" % dragon.OUT_DIR
     args += " PACKAGES_DIR=%s" % os.path.join(dragon.WORKSPACE_DIR, "packages")
-    dragon.exec_dir_cmd(dirpath=dirpath,
-        cmd="${ANDROID_NDK_PATH}/ndk-build %s" % args)
+    dragon.exec_cmd(
+        cmd="${ANDROID_NDK_PATH}/ndk-build %s" % args,
+        cwd=dirpath)
 
 def build_android_app(dirpath, args, release=False):
     # Build application
@@ -39,13 +40,13 @@ def build_android_app(dirpath, args, release=False):
     cmd += "assembleRelease " if release else "assembleDebug "
     if args:
         cmd += " ".join(args)
-    dragon.exec_dir_cmd(dirpath=dirpath, cmd=cmd)
+    dragon.exec_cmd(cmd=cmd, cwd=dirpath)
 
 def publish_android_sdk():
     # Build application
     cmd = "./gradlew "
     cmd += "bintrayUpload"
-    dragon.exec_dir_cmd(dirpath=android_arsdk3_dir, cmd=cmd)
+    dragon.exec_cmd(cmd=cmd, cwd=android_arsdk3_dir)
 
 if dragon.VARIANT == "android":
     dragon.add_meta_task(
@@ -87,7 +88,7 @@ def build_ios_app(dirpath, project, sdk, args, release=False):
         cmd += "-arch x86_64 "
     if args:
         cmd += " ".join(args)
-    dragon.exec_dir_cmd(dirpath=dirpath, cmd=cmd)
+    dragon.exec_cmd(cmd=cmd, cwd=dirpath)
 
 if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
     if os.path.exists(android_sample_dir):
@@ -140,8 +141,8 @@ def hook_gen_sources(task, args):
         try:
             path = os.path.join(packages_dir, package)
             if os.path.isfile(os.path.join(path, "updateGenerated.sh")):
-                dragon.exec_dir_cmd(dirpath=path, cmd="./updateGenerated.sh")
-                dragon.exec_dir_cmd(dirpath=path, cmd="git status")
+                dragon.exec_cmd(cmd="./updateGenerated.sh", cwd=path)
+                dragon.exec_cmd(cmd="git status", cwd=path)
         except dragon.TaskError as ex:
             dragon.logging.error(str(ex))
 
