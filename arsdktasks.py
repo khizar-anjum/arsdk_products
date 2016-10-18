@@ -45,9 +45,10 @@ def add_android_abi(abi):
 if dragon.VARIANT == "android":
     # Register all abi/arch
     add_android_abi("armeabi")
-    add_android_abi("armeabi_v7a")
+    add_android_abi("armeabi-v7a")
     add_android_abi("mips")
     add_android_abi("x86")
+    add_android_abi("arm64-v8a")
 
     # Meta-task to build all sdk abi/arch
     dragon.add_meta_task(
@@ -55,9 +56,10 @@ if dragon.VARIANT == "android":
         desc="Build android sdk for all architectures",
         subtasks=[
             "alchemy-armeabi all sdk",
-            "alchemy-armeabi_v7a all sdk",
+            "alchemy-armeabi-v7a all sdk",
             "alchemy-mips all sdk",
             "alchemy-x86 all sdk",
+            "alchemy-arm64-v8a all sdk",
         ],
         weak=True
     )
@@ -68,9 +70,10 @@ if dragon.VARIANT == "android":
         subtasks=[
             "alchemy clobber",
             "alchemy-armeabi clobber",
-            "alchemy-armeabi_v7a clobber",
+            "alchemy-armeabi-v7a clobber",
             "alchemy-mips clobber",
-            "alchemy-x86 clobber"
+            "alchemy-x86 clobber",
+            "alchemy-arm64-v8a clobber",
         ]
     )
 
