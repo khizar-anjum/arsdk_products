@@ -129,7 +129,7 @@ if dragon.VARIANT == "native":
     dragon.add_meta_task(
         name = "build-sample",
         desc = "Build all native samples",
-        subtasks = all_samples
+        subtasks = ["build-sdk"] + all_samples
     )
 
 #===============================================================================
@@ -150,4 +150,10 @@ dragon.add_meta_task(
     name = "gensources",
     desc = "Generate all sdk sources",
     posthook = hook_gen_sources,
+)
+
+dragon.add_meta_task(
+    name = "build",
+    desc = "Build sdk & samples",
+    subtasks = ["build-sample"]
 )
