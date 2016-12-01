@@ -145,10 +145,7 @@ def add_unix_sample(sample):
 if dragon.VARIANT == "native":
     clean_samples = []
     all_samples = []
-    samples = ["BebopDroneDecodeStream", "BebopDroneReceiveStream",
-               "BebopPilotingNewAPI", "JumpingSumoPilotingNewAPI",
-               "JumpingSumoChangePosture", "JumpingSumoPiloting",
-               "JumpingSumoReceiveStream"]
+    samples = ["BebopSample", "JumpingSumoSample"]
     for sample in samples:
         add_unix_sample(sample)
         all_samples.append("build-sample-%s" % sample)
