@@ -34,10 +34,13 @@ def build_android_jni(dirpath, args):
         cmd="${ANDROID_NDK_PATH}/ndk-build %s" % args,
         cwd=dirpath)
 
-def build_android_app(dirpath, args, release=False):
+def build_android_app(dirpath, args, release=False, clean=False):
     # Build application
     cmd = "./gradlew "
-    cmd += "assembleRelease " if release else "assembleDebug "
+    if clean:
+        cmd += "clean "
+    else:
+        cmd += "assembleRelease " if release else "assembleDebug "
     if args:
         cmd += " ".join(args)
     dragon.exec_cmd(cmd=cmd, cwd=dirpath)
@@ -74,6 +77,13 @@ if dragon.VARIANT == "android":
                 os.path.join(android_sample_dir, "buildWithLocalSDK"),
                 args, release=False)
         )
+        dragon.add_meta_task(
+            name = "clean-sample",
+            desc = "Clean the android sample in debug",
+            posthook = lambda task, args: build_android_app(
+                os.path.join(android_sample_dir, "buildWithLocalSDK"),
+                args, release=False, clean=True)
+        )
 
 #===============================================================================
 # iOS
@@ -102,6 +112,15 @@ if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
                 "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
                 args, release=False)
             )
+        dragon.add_meta_task(
+            name = "clean-sample",
+            desc = "Build the ios samples in debug",
+            posthook = lambda task, args: build_ios_app(
+                ios_sample_dir,
+                "SDKSample.xcodeproj",
+                "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
+                ["clean"] + args, release=False)
+            )
 
 #===============================================================================
 # Unix
@@ -115,21 +134,33 @@ def add_unix_sample(sample):
         variant = dragon.VARIANT,
         defargs = [sample],
     )
+    dragon.add_alchemy_task(
+        name = "clean-sample-%s" % sample,
+        desc = "Clean unix sdk sample for %s" % sample,
+        product = dragon.PRODUCT,
+        variant = dragon.VARIANT,
+        defargs = [sample + "-clean"],
+    )
 
 if dragon.VARIANT == "native":
+    clean_samples = []
     all_samples = []
-    samples = ["BebopDroneDecodeStream", "BebopDroneReceiveStream",
-               "BebopPilotingNewAPI", "JumpingSumoPilotingNewAPI",
-               "JumpingSumoChangePosture", "JumpingSumoPiloting",
-               "JumpingSumoReceiveStream"]
+    samples = ["BebopSample", "JumpingSumoSample"]
     for sample in samples:
         add_unix_sample(sample)
         all_samples.append("build-sample-%s" % sample)
+        clean_samples.append("clean-sample-%s" % sample)
 
     dragon.add_meta_task(
         name = "build-sample",
         desc = "Build all native samples",
-        subtasks = all_samples
+        subtasks = ["build-sdk"] + all_samples
+    )
+
+    dragon.add_meta_task(
+        name = "clean-sample",
+        desc = "Clean all native samples",
+        subtasks = clean_samples
     )
 
 #===============================================================================
@@ -150,4 +181,16 @@ dragon.add_meta_task(
     name = "gensources",
     desc = "Generate all sdk sources",
     posthook = hook_gen_sources,
+)
+
+dragon.add_meta_task(
+    name = "build",
+    desc = "Build sdk & samples",
+    subtasks = ["build-sample"]
+)
+
+dragon.add_meta_task(
+    name = "clean",
+    desc = "Clean everything",
+    subtasks=["clean-sdk", "clean-sample"],
 )

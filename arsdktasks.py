@@ -45,9 +45,10 @@ def add_android_abi(abi):
 if dragon.VARIANT == "android":
     # Register all abi/arch
     add_android_abi("armeabi")
-    add_android_abi("armeabi_v7a")
+    add_android_abi("armeabi-v7a")
     add_android_abi("mips")
     add_android_abi("x86")
+    add_android_abi("arm64-v8a")
 
     # Meta-task to build all sdk abi/arch
     dragon.add_meta_task(
@@ -55,22 +56,25 @@ if dragon.VARIANT == "android":
         desc="Build android sdk for all architectures",
         subtasks=[
             "alchemy-armeabi all sdk",
-            "alchemy-armeabi_v7a all sdk",
+            "alchemy-armeabi-v7a all sdk",
             "alchemy-mips all sdk",
             "alchemy-x86 all sdk",
+            "alchemy-arm64-v8a all sdk",
         ],
         weak=True
     )
 
-    # override clean to clean all abi/arch
-    dragon.override_meta_task(
-        name="clean",
+    # add clean-sdk to clean all abi/arch
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc = "Clean android sdk for all architectures",
         subtasks=[
             "alchemy clobber",
             "alchemy-armeabi clobber",
-            "alchemy-armeabi_v7a clobber",
+            "alchemy-armeabi-v7a clobber",
             "alchemy-mips clobber",
-            "alchemy-x86 clobber"
+            "alchemy-x86 clobber",
+            "alchemy-arm64-v8a clobber",
         ]
     )
 
@@ -86,18 +90,28 @@ if dragon.VARIANT == "ios":
         posthook = lambda task, args: create_ios_compat_symlink(),
         weak = True,
     )
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc = "Clean ios sdk",
+        subtasks=["alchemy clobber"]
+    )
 
 #===============================================================================
 #===============================================================================
 if dragon.VARIANT == "ios_sim":
     dragon.add_alchemy_task(
         name = "build-sdk",
-        desc = "Build ios simulattor sdk",
+        desc = "Build ios simulator sdk",
         product = dragon.PRODUCT,
         variant = dragon.VARIANT,
         defargs = ["all","sdk"],
         posthook = lambda task, args: create_ios_sim_compat_symlink(),
         weak = True,
+    )
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc = "Clean ios simulator sdk",
+        subtasks=["alchemy clobber"]
     )
 
 if dragon.VARIANT == "native":
@@ -109,4 +123,9 @@ if dragon.VARIANT == "native":
         defargs = ["all"],
         posthook = lambda task, args: create_native_compat_symlink(),
         weak = True,
+    )
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc = "Clean native sdk",
+        subtasks=["alchemy clobber"]
     )

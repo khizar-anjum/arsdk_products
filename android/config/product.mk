@@ -9,13 +9,12 @@ TARGET_OS := linux
 TARGET_OS_FLAVOUR := android
 TARGET_LIBC := bionic
 
+TARGET_ANDROID_APILEVEL := 14
+
 # Setup arch/cpu based on abi
 ifeq ("$(ANDROID_ABI)","armeabi")
   TARGET_ARCH := arm
 else ifeq ("$(ANDROID_ABI)","armeabi-v7a")
-  TARGET_ARCH := arm
-  TARGET_CPU := armv7a
-else ifeq ("$(ANDROID_ABI)","armeabi_v7a")
   TARGET_ARCH := arm
   TARGET_CPU := armv7a
 else ifeq ("$(ANDROID_ABI)","mips")
@@ -24,9 +23,12 @@ else ifeq ("$(ANDROID_ABI)","mips")
 else ifeq ("$(ANDROID_ABI)","x86")
   TARGET_ARCH := x86
   TARGET_CPU :=
+else ifeq ("$(ANDROID_ABI)","arm64-v8a")
+  TARGET_ARCH := aarch64
+  TARGET_CPU :=
+  TARGET_ANDROID_APILEVEL := 21
 else ifeq ("$(ANDROID_ABI)","")
   $(warning Missing ANDROID_ABI using armeabi-v7a)
-  ANDROID_ABI := armeabi_v7a
   TARGET_ARCH := arm
   TARGET_CPU := armv7a
 else
@@ -41,7 +43,6 @@ ifndef ANDROID_SDK_PATH
   $(error Missing ANDROID_SDK_PATH)
 endif
 
-TARGET_ANDROID_APILEVEL := 14
 TARGET_ANDROID_NDK := $(ANDROID_NDK_PATH)
 TARGET_ANDROID_SDK := $(ANDROID_SDK_PATH)
 
