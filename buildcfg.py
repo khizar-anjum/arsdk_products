@@ -1,17 +1,8 @@
-
 import sys, os
 import dragon
 
-# Disable all default tasks and import arsdk ones
-keep_list = [
-    "alchemy",
-    "geneclipse",
-    "publish",
-    "reference-checker",
-    "reference-creator",
-]
-dragon.disable_def_tasks(keep_list=keep_list)
-from arsdktasks import *
+import apps_tools.android as android
+import apps_tools.ios as ios
 
 android_arsdk3_dir = os.path.join(dragon.WORKSPACE_DIR,
         "packages", "ARSDK3")
@@ -25,142 +16,171 @@ ios_sample_dir = os.path.join(dragon.WORKSPACE_DIR,
 #===============================================================================
 # Android
 #===============================================================================
-def build_android_jni(dirpath, args):
-    outdir = os.path.join(dragon.OUT_DIR, "jni")
-    args = "NDK_OUT=%s" % os.path.join(outdir, "obj")
-    args += " PRODUCT_OUT_DIR=%s" % dragon.OUT_DIR
-    args += " PACKAGES_DIR=%s" % os.path.join(dragon.WORKSPACE_DIR, "packages")
-    dragon.exec_cmd(
-        cmd="${ANDROID_NDK_PATH}/ndk-build %s" % args,
-        cwd=dirpath)
-
-def build_android_app(dirpath, args, release=False, clean=False):
-    # Build application
-    cmd = "./gradlew "
-    if clean:
-        cmd += "clean "
-    else:
-        cmd += "assembleRelease " if release else "assembleDebug "
-    if args:
-        cmd += " ".join(args)
-    dragon.exec_cmd(cmd=cmd, cwd=dirpath)
-
-def publish_android_sdk():
-    # Build application
-    cmd = "./gradlew "
-    cmd += "bintrayUpload"
-    dragon.exec_cmd(cmd=cmd, cwd=android_arsdk3_dir)
 
 if dragon.VARIANT == "android":
-    dragon.add_meta_task(
-            name = "build-jni",
-            desc = "Build android sdk & jni",
-            subtasks = ["build-sdk"],
-            posthook = lambda task, args: build_android_jni(
-                os.path.join(android_arsdk3_dir, "arsdk", "jni"),
-                args)
+    android_abis = ["armeabi", "armeabi-v7a", "arm64-v8a",
+                    "mips",
+                    "x86"]
+
+    android.add_task_build_common(android_abis)
+
+    android.add_ndk_build_task(
+        name="build-jni",
+        desc="Build android common code & arsdk jni",
+        subtasks=["build-common"],
+        calldir=os.path.join(android_arsdk3_dir, "arsdk", "jni"),
+        module="arsdk",
+        abis=android_abis,
+        extra_args=["PACKAGES_DIR={}".format(os.path.join(dragon.WORKSPACE_DIR,
+                                                          "packages"))]
+    )
+
+    android.add_ndk_build_task(
+        name="clean-jni",
+        desc="Clean android arsdk jni",
+        calldir=os.path.join(android_arsdk3_dir, "arsdk", "jni"),
+        module="arsdk",
+        abis=android_abis,
+        extra_args=["PACKAGES_DIR={}".format(os.path.join(dragon.WORKSPACE_DIR,
+                                                          "packages")),
+                    "clean"],
+        ignore_failure=True
     )
 
     dragon.add_meta_task(
-            name = "publish",
-            desc = "Build android sdk & jni",
-            subtasks = ["build-jni"],
-            posthook = lambda task, args: publish_android_sdk()
+        name="build-sdk",
+        desc="build android sdk",
+        subtasks=["build-jni"]
+    )
+
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc="clean android sdk",
+        subtasks=["clean-jni", "clean-common"]
+    )
+
+    android.add_gradle_task(
+        name="publish",
+        desc="Build & publish android sdk & jni",
+        subtasks=["build-sdk"],
+        calldir=android_arsdk3_dir,
+        target="bintrayUpload"
     )
 
     if os.path.exists(android_sample_dir):
-        dragon.add_meta_task(
-            name = "build-sample",
-            desc = "Build the android sample in debug",
-            subtasks = ["build-jni"],
-            posthook = lambda task, args: build_android_app(
-                os.path.join(android_sample_dir, "buildWithLocalSDK"),
-                args, release=False)
+        android.add_gradle_task(
+            name="build-sample",
+            desc="Build the android sample in debug",
+            subtasks=["build-sdk"],
+            calldir=os.path.join(android_sample_dir, "buildWithLocalSDK"),
+            target="assembleDebug"
         )
-        dragon.add_meta_task(
-            name = "clean-sample",
-            desc = "Clean the android sample in debug",
-            posthook = lambda task, args: build_android_app(
-                os.path.join(android_sample_dir, "buildWithLocalSDK"),
-                args, release=False, clean=True)
+        android.add_gradle_task(
+            name="clean-sample",
+            desc="Clean the android sample",
+            subtasks=["clean-sdk"],
+            calldir=os.path.join(android_sample_dir, "buildWithLocalSDK"),
+            target="clean"
         )
 
 #===============================================================================
 # iOS
 #===============================================================================
-def build_ios_app(dirpath, project, sdk, args, release=False):
-    # Build application
-    cmd = "xcodebuild "
-    cmd += "-project %s " % project
-    cmd += "-sdk %s " % sdk
-    cmd += "-configuration DebugWithLocalSDK "
-    if sdk == "iphonesimulator":
-        cmd += "-arch x86_64 "
-    if args:
-        cmd += " ".join(args)
-    dragon.exec_cmd(cmd=cmd, cwd=dirpath)
-
 if dragon.VARIANT == "ios" or dragon.VARIANT == "ios_sim":
-    if os.path.exists(android_sample_dir):
-        dragon.add_meta_task(
-            name = "build-sample",
-            desc = "Build the ios samples in debug",
-            subtasks = ["build-sdk"],
-            posthook = lambda task, args: build_ios_app(
-                ios_sample_dir,
-                "SDKSample.xcodeproj",
-                "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
-                args, release=False)
-            )
-        dragon.add_meta_task(
-            name = "clean-sample",
-            desc = "Build the ios samples in debug",
-            posthook = lambda task, args: build_ios_app(
-                ios_sample_dir,
-                "SDKSample.xcodeproj",
-                "iphoneos" if dragon.VARIANT == "ios" else "iphonesimulator",
-                ["clean"] + args, release=False)
-            )
+    ios.add_task_build_common()
+
+    dragon.add_meta_task(
+        name="build-sdk",
+        desc="build ios sdk",
+        subtasks=["build-common"]
+    )
+
+    dragon.add_meta_task(
+        name="clean-sdk",
+        desc="clean ios sdk",
+        subtasks=["clean-common"]
+    )
+
+    if os.path.exists(ios_sample_dir):
+        ios.add_xcodebuild_task(
+            name="build-sample",
+            desc="Build the ios samples in debug",
+            subtasks=["build-sdk"],
+            calldir=ios_sample_dir,
+            workspace="SDKSample.xcodeproj",
+            configuration="DebugWithLocalSDK",
+            scheme="SDKSample",
+            action="build"
+        )
+        ios.add_xcodebuild_task(
+            name="clean-sample",
+            desc="Clean the ios samples in debug",
+            subtasks=["clean-sdk"],
+            calldir=ios_sample_dir,
+            workspace="SDKSample.xcodeproj",
+            configuration="DebugWithLocalSDK",
+            scheme="SDKSample",
+            action="clean"
+        )
+
 
 #===============================================================================
 # Unix
 #===============================================================================
 
 def add_unix_sample(sample):
+    name = "build-sample-%s" % sample
+    c_name = "clean-sample-%s" % sample
     dragon.add_alchemy_task(
-        name = "build-sample-%s" % sample,
-        desc = "Build unix sdk sample for %s" % sample,
-        product = dragon.PRODUCT,
-        variant = dragon.VARIANT,
-        defargs = [sample],
+        name=name,
+        desc="Build unix sdk sample for %s" % sample,
+        product=dragon.PRODUCT,
+        variant=dragon.VARIANT,
+        defargs=[sample],
     )
     dragon.add_alchemy_task(
-        name = "clean-sample-%s" % sample,
-        desc = "Clean unix sdk sample for %s" % sample,
-        product = dragon.PRODUCT,
-        variant = dragon.VARIANT,
-        defargs = [sample + "-clean"],
+        name=c_name,
+        desc="Clean unix sdk sample for %s" % sample,
+        product=dragon.PRODUCT,
+        variant=dragon.VARIANT,
+        defargs=["%s-clean" % sample],
     )
+    return (name, c_name)
 
 if dragon.VARIANT == "native":
-    clean_samples = []
+    dragon.add_alchemy_task(
+        name="build-sdk",
+        desc="Build native sdk",
+        product=dragon.PRODUCT,
+        variant=dragon.VARIANT,
+        defargs=["all"]
+    )
+    dragon.add_alchemy_task(
+        name="clean-sdk",
+        desc="Clean native sdk",
+        product=dragon.PRODUCT,
+        variant=dragon.VARIANT,
+        defargs=["clobber"]
+    )
+
     all_samples = []
+    clean_samples = []
     samples = ["BebopSample", "JumpingSumoSample"]
     for sample in samples:
-        add_unix_sample(sample)
-        all_samples.append("build-sample-%s" % sample)
-        clean_samples.append("clean-sample-%s" % sample)
+        b, c = add_unix_sample(sample)
+        all_samples.append(b)
+        clean_samples.append(c)
 
     dragon.add_meta_task(
-        name = "build-sample",
-        desc = "Build all native samples",
-        subtasks = ["build-sdk"] + all_samples
+        name="build-sample",
+        desc="Build all native samples",
+        subtasks=["build-sdk"] + all_samples
     )
 
     dragon.add_meta_task(
-        name = "clean-sample",
-        desc = "Clean all native samples",
-        subtasks = clean_samples
+        name="clean-sample",
+        desc="Clean all native samples",
+        subtasks=clean_samples + ["clean-sdk"]
     )
 
 #===============================================================================
@@ -178,19 +198,19 @@ def hook_gen_sources(task, args):
             dragon.logging.error(str(ex))
 
 dragon.add_meta_task(
-    name = "gensources",
-    desc = "Generate all sdk sources",
-    posthook = hook_gen_sources,
+    name="gensources",
+    desc="Generate all sdk sources",
+    posthook=hook_gen_sources,
 )
 
 dragon.add_meta_task(
-    name = "build",
-    desc = "Build sdk & samples",
-    subtasks = ["build-sample"]
+    name="build",
+    desc="Build sdk & samples",
+    subtasks=["build-sample"]
 )
 
 dragon.add_meta_task(
-    name = "clean",
-    desc = "Clean everything",
-    subtasks=["clean-sdk", "clean-sample"],
+    name="clean",
+    desc="Clean sdk & samples",
+    subtasks=["clean-sample"]
 )
