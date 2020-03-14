@@ -165,7 +165,7 @@ if dragon.VARIANT == "native":
 
     all_samples = []
     clean_samples = []
-    samples = ["BebopSample", "JumpingSumoSample"]
+    samples = ["BebopSample", "JumpingSumoSample", "BebopController"]
     for sample in samples:
         b, c = add_unix_sample(sample)
         all_samples.append(b)
